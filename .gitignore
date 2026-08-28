@@ -11,7 +11,20 @@
 /tmp/
 
 # Used by dotenv library to load environment variables.
-# .env
+api/.env
+web/.env
+
+# Frontend
+web/node_modules/
+web/dist/
+
+# Rails
+api/tmp/
+api/log/
+api/.bundle/
+
+# OS
+.DS_Store
 
 # Ignore Byebug command history file.
 .byebug_history
