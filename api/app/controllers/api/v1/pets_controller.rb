@@ -29,11 +29,19 @@ module Api
         render json: { message: "Pet deleted" }
       end
 
-      def feed    = care_action { PetMechanics.feed(@pet) }
-      def walk    = care_action { PetMechanics.walk(@pet) }
-      def bathe   = care_action { PetMechanics.bathe(@pet) }
-      def sleep   = care_action { PetMechanics.sleep(@pet) }
-      def play    = care_action { PetMechanics.play(@pet) }
+      def feed  = care_action { PetMechanics.feed(@pet) }
+      def walk  = care_action { PetMechanics.walk(@pet) }
+      def bathe = care_action { PetMechanics.bathe(@pet) }
+
+      def sleep
+        hours = params.fetch(:hours, 8).to_i
+        care_action { PetMechanics.sleep(@pet, hours: hours) }
+      end
+
+      def play
+        hours = params.fetch(:hours, 4).to_i
+        care_action { PetMechanics.play(@pet, hours: hours) }
+      end
 
       def check_status
         result = PetMechanics.check_status(@pet)

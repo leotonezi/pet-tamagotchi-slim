@@ -15,6 +15,8 @@ export interface Pet {
   is_alive: boolean
   birth_date: string
   last_interaction: string
+  active_action: string | null
+  action_ends_at: string | null
 }
 
 export const petsApi = {
@@ -26,7 +28,9 @@ export const petsApi = {
   feed: (id: number) => client.post<Pet>(`/api/v1/pets/${id}/feed`),
   walk: (id: number) => client.post<Pet>(`/api/v1/pets/${id}/walk`),
   bathe: (id: number) => client.post<Pet>(`/api/v1/pets/${id}/bathe`),
-  sleep: (id: number) => client.post<Pet>(`/api/v1/pets/${id}/sleep`),
-  play: (id: number) => client.post<Pet>(`/api/v1/pets/${id}/play`),
+  sleep: (id: number, hours: 4 | 8) =>
+    client.post<Pet>(`/api/v1/pets/${id}/sleep`, { hours }),
+  play: (id: number, hours: 1 | 2 | 4) =>
+    client.post<Pet>(`/api/v1/pets/${id}/play`, { hours }),
   checkStatus: (id: number) => client.post<Pet>(`/api/v1/pets/${id}/check_status`),
 }

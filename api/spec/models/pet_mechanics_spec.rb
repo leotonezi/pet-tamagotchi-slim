@@ -57,30 +57,52 @@ RSpec.describe PetMechanics do
   end
 
   describe ".sleep" do
-    it "reduces tiredness by 50" do
+    it "reduces tiredness by 50 at 8h" do
       pet.update!(tiredness: 60)
-      PetMechanics.sleep(pet)
+      PetMechanics.sleep(pet, hours: 8)
       expect(pet.reload.tiredness).to eq(10)
     end
 
+    it "reduces tiredness by 25 at 4h" do
+      pet.update!(tiredness: 60)
+      PetMechanics.sleep(pet, hours: 4)
+      expect(pet.reload.tiredness).to eq(35)
+    end
+
     it "clamps tiredness at 0" do
-      pet.update!(tiredness: 20)
-      PetMechanics.sleep(pet)
+      pet.update!(tiredness: 10)
+      PetMechanics.sleep(pet, hours: 8)
       expect(pet.reload.tiredness).to eq(0)
+    end
+
+    it "returns error for invalid duration" do
+      result = PetMechanics.sleep(pet, hours: 6)
+      expect(result.success?).to be false
     end
   end
 
   describe ".play" do
-    it "increases happiness by 20" do
+    it "increases happiness by 20 at 4h" do
       pet.update!(happiness: 50)
-      PetMechanics.play(pet)
+      PetMechanics.play(pet, hours: 4)
       expect(pet.reload.happiness).to eq(70)
+    end
+
+    it "increases happiness by 10 at 2h" do
+      pet.update!(happiness: 50)
+      PetMechanics.play(pet, hours: 2)
+      expect(pet.reload.happiness).to eq(60)
     end
 
     it "clamps happiness at 100" do
       pet.update!(happiness: 90)
-      PetMechanics.play(pet)
+      PetMechanics.play(pet, hours: 4)
       expect(pet.reload.happiness).to eq(100)
+    end
+
+    it "returns error for invalid duration" do
+      result = PetMechanics.play(pet, hours: 3)
+      expect(result.success?).to be false
     end
   end
 
@@ -126,6 +148,28 @@ RSpec.describe PetMechanics do
       pet.happiness = 4
       PetMechanics.refresh_needs_and_health(pet)
       expect(pet.is_alive).to be false
+    end
+  end
+
+  describe "busy state" do
+    it "prevents action while pet is busy" do
+      pet.update!(active_action: "feeding", action_ends_at: 10.minutes.from_now)
+      result = PetMechanics.walk(pet)
+      expect(result.success?).to be false
+      expect(result.error).to include("feeding")
+    end
+
+    it "allows action once busy period expires" do
+      pet.update!(active_action: "feeding", action_ends_at: 1.minute.ago)
+      result = PetMechanics.walk(pet)
+      expect(result.success?).to be true
+    end
+
+    it "sets active_action and action_ends_at after feed" do
+      PetMechanics.feed(pet)
+      pet.reload
+      expect(pet.active_action).to eq("feeding")
+      expect(pet.action_ends_at).to be > Time.current
     end
   end
 
