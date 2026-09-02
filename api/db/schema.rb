@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_02_214401) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_02_220751) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -28,6 +28,36 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_02_214401) do
     t.index ["previous_refresh_token"], name: "index_devise_api_tokens_on_previous_refresh_token"
     t.index ["refresh_token"], name: "index_devise_api_tokens_on_refresh_token", unique: true
     t.index ["resource_owner_type", "resource_owner_id"], name: "index_devise_api_tokens_on_resource_owner"
+  end
+
+  create_table "inventories", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_inventories_on_user_id", unique: true
+  end
+
+  create_table "inventory_slots", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "inventory_id", null: false
+    t.bigint "item_id", null: false
+    t.integer "qty", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["inventory_id", "item_id"], name: "index_inventory_slots_on_inventory_id_and_item_id", unique: true
+    t.index ["inventory_id"], name: "index_inventory_slots_on_inventory_id"
+    t.index ["item_id"], name: "index_inventory_slots_on_item_id"
+  end
+
+  create_table "items", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.integer "happiness_delta", default: 0, null: false
+    t.integer "hunger_delta", default: 0, null: false
+    t.integer "hygiene_delta", default: 0, null: false
+    t.string "name", null: false
+    t.integer "price_coins", null: false
+    t.integer "tiredness_delta", default: 0, null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "pets", force: :cascade do |t|
@@ -67,5 +97,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_02_214401) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "inventories", "users"
+  add_foreign_key "inventory_slots", "inventories"
+  add_foreign_key "inventory_slots", "items"
   add_foreign_key "pets", "users"
 end

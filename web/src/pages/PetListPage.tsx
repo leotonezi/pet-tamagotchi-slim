@@ -42,9 +42,12 @@ export default function PetListPage() {
             <h1 className="text-3xl font-bold">My Pets</h1>
             <p className="text-sm text-gray-500 mt-1">{user?.email} · {user?.coins ?? 0} coins</p>
           </div>
-          <button onClick={handleSignOut} className="text-sm text-gray-500 hover:text-red-500">
-            Sign out
-          </button>
+          <div className="flex items-center gap-4">
+            <Link to="/shop" className="text-sm text-blue-500 hover:underline">🛒 Shop</Link>
+            <button onClick={handleSignOut} className="text-sm text-gray-500 hover:text-red-500">
+              Sign out
+            </button>
+          </div>
         </div>
 
         {/* Create form */}

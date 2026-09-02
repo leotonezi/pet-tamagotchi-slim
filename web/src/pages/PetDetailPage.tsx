@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { petsApi } from '../api/pets'
+import { shopApi } from '../api/shop'
 import { usePet } from '../hooks/usePet'
 
 const ACTION_LABELS: Record<string, string> = {
@@ -44,7 +45,20 @@ export default function PetDetailPage() {
 
   const countdown = useCountdown(pet?.action_ends_at ?? null)
 
+  const { data: inventory } = useQuery({
+    queryKey: ['inventory'],
+    queryFn: () => shopApi.inventory().then(r => r.data),
+  })
+
   const invalidate = () => qc.invalidateQueries({ queryKey: ['pet', petId] })
+
+  const useMut = useMutation({
+    mutationFn: (itemId: number) => shopApi.use(itemId, petId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['pet', petId] })
+      qc.invalidateQueries({ queryKey: ['inventory'] })
+    },
+  })
 
   const feedMut  = useMutation({ mutationFn: () => petsApi.feed(petId),  onSuccess: invalidate })
   const walkMut  = useMutation({ mutationFn: () => petsApi.walk(petId),  onSuccess: invalidate })
@@ -174,6 +188,37 @@ export default function PetDetailPage() {
             </p>
           )}
         </div>
+
+        {/* Inventory panel */}
+        {(() => {
+          const ownedSlots = inventory?.inventory_slots.filter(s => s.qty > 0) ?? []
+          if (ownedSlots.length === 0) return null
+          return (
+            <div className="bg-white rounded-2xl shadow p-6 mt-4">
+              <h2 className="font-semibold mb-4 text-sm text-gray-500 uppercase tracking-wide">Inventory</h2>
+              <div className="grid grid-cols-2 gap-3">
+                {ownedSlots.map(slot => (
+                  <div key={slot.id} className="border rounded-xl p-3 flex items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm truncate">{slot.item.name}</p>
+                      <p className="text-xs text-gray-400">×{slot.qty}</p>
+                    </div>
+                    <button
+                      onClick={() => useMut.mutate(slot.item.id)}
+                      disabled={dead || useMut.isPending}
+                      className="shrink-0 text-xs bg-green-500 text-white rounded-lg px-3 py-1.5 font-semibold hover:bg-green-600 disabled:opacity-40"
+                    >
+                      Use
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <Link to="/shop" className="block mt-4 text-xs text-center text-blue-500 hover:underline">
+                Shop for more →
+              </Link>
+            </div>
+          )
+        })()}
       </div>
     </div>
   )

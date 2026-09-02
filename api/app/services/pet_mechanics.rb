@@ -55,6 +55,25 @@ module PetMechanics
     end
   end
 
+  def self.use_item(pet, item)
+    unless pet.is_alive
+      return Result.new(success?: false, error: "Pet is not alive")
+    end
+
+    pet.with_lock do
+      apply_time_decay(pet)
+      pet.hunger    = clamp(pet.hunger    + item.hunger_delta)
+      pet.hygiene   = clamp(pet.hygiene   + item.hygiene_delta)
+      pet.happiness = clamp(pet.happiness + item.happiness_delta)
+      pet.tiredness = clamp(pet.tiredness + item.tiredness_delta)
+      refresh_needs_and_health(pet)
+      pet.save!
+    end
+    Result.new(success?: true)
+  rescue => e
+    Result.new(success?: false, error: e.message)
+  end
+
   def self.check_status(pet)
     pet.with_lock do
       apply_time_decay(pet)

@@ -12,6 +12,12 @@ Rails.application.routes.draw do
         get    "me",       to: "auth#me"
       end
 
+      resources :items, only: [:index]
+
+      get  "inventory",      to: "inventory#show"
+      post "inventory/buy",  to: "inventory#buy"
+      post "inventory/use",  to: "inventory#use"
+
       resources :pets, only: %i[index show create destroy] do
         member do
           post :feed
