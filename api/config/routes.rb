@@ -11,6 +11,17 @@ Rails.application.routes.draw do
         delete "sign_out", to: "auth#sign_out"
         get    "me",       to: "auth#me"
       end
+
+      resources :pets, only: %i[index show create destroy] do
+        member do
+          post :feed
+          post :walk
+          post :bathe
+          post :sleep
+          post :play
+          post :check_status
+        end
+      end
     end
   end
 end

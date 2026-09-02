@@ -1,7 +1,8 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import ProtectedRoute from './components/shared/ProtectedRoute'
 import { AuthProvider } from './contexts/AuthContext'
-import HomePage from './pages/HomePage'
+import PetDetailPage from './pages/PetDetailPage'
+import PetListPage from './pages/PetListPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 
@@ -14,11 +15,11 @@ export default function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route
             path="/pets"
-            element={
-              <ProtectedRoute>
-                <HomePage />
-              </ProtectedRoute>
-            }
+            element={<ProtectedRoute><PetListPage /></ProtectedRoute>}
+          />
+          <Route
+            path="/pets/:id"
+            element={<ProtectedRoute><PetDetailPage /></ProtectedRoute>}
           />
           <Route path="*" element={<Navigate to="/pets" replace />} />
         </Routes>

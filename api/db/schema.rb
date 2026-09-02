@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_02_212003) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_02_212911) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -30,6 +30,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_02_212003) do
     t.index ["resource_owner_type", "resource_owner_id"], name: "index_devise_api_tokens_on_resource_owner"
   end
 
+  create_table "pets", force: :cascade do |t|
+    t.datetime "birth_date", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "created_at", null: false
+    t.integer "happiness", default: 70, null: false
+    t.integer "health", default: 75, null: false
+    t.integer "hunger", default: 30, null: false
+    t.integer "hygiene", default: 80, null: false
+    t.boolean "is_alive", default: true, null: false
+    t.datetime "last_interaction", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.string "name", limit: 32, null: false
+    t.boolean "needs_bath", default: false, null: false
+    t.boolean "needs_meal", default: false, null: false
+    t.boolean "needs_walk", default: false, null: false
+    t.string "species", limit: 16, null: false
+    t.integer "tiredness", default: 20, null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["is_alive"], name: "index_pets_on_is_alive"
+    t.index ["user_id", "name"], name: "index_pets_on_user_id_and_name", unique: true
+    t.index ["user_id"], name: "index_pets_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.integer "coins", default: 0, null: false
     t.datetime "created_at", null: false
@@ -42,4 +64,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_02_212003) do
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
+
+  add_foreign_key "pets", "users"
 end
