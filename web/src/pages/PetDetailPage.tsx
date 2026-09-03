@@ -13,14 +13,18 @@ const ACTION_LABELS: Record<string, string> = {
   playing:  '🎮 Playing',
 }
 
-function useCountdown(endsAt: string | null) {
+function useCountdown(endsAt: string | null, onExpire?: () => void) {
   const [remaining, setRemaining] = useState('')
 
   useEffect(() => {
     if (!endsAt) { setRemaining(''); return }
     const update = () => {
       const diff = new Date(endsAt).getTime() - Date.now()
-      if (diff <= 0) { setRemaining(''); return }
+      if (diff <= 0) {
+        setRemaining('')
+        onExpire?.()
+        return
+      }
       const h = Math.floor(diff / 3600000)
       const m = Math.floor((diff % 3600000) / 60000)
       const s = Math.floor((diff % 60000) / 1000)
@@ -29,6 +33,7 @@ function useCountdown(endsAt: string | null) {
     update()
     const id = setInterval(update, 1000)
     return () => clearInterval(id)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [endsAt])
 
   return remaining
@@ -43,7 +48,10 @@ export default function PetDetailPage() {
   const [sleepPicker, setSleepPicker] = useState(false)
   const [playPicker, setPlayPicker]   = useState(false)
 
-  const countdown = useCountdown(pet?.action_ends_at ?? null)
+  const countdown = useCountdown(
+    pet?.action_ends_at ?? null,
+    () => qc.invalidateQueries({ queryKey: ['pet', petId] })
+  )
 
   const { data: inventory } = useQuery({
     queryKey: ['inventory'],
