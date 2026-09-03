@@ -94,10 +94,10 @@ module PetMechanics
       pet.action_ends_at = nil
     end
 
-    elapsed_hours = (now - pet.last_interaction) / 3600.0
-    pet.hunger    = clamp(pet.hunger    + (elapsed_hours / 4.0).floor)
-    pet.tiredness = clamp(pet.tiredness - (elapsed_hours / 4.0).floor)
-    pet.hygiene   = clamp(pet.hygiene   - (elapsed_hours / 6.0).floor)
+    elapsed_minutes = (now - pet.last_interaction) / 60.0
+    pet.hunger    = clamp(pet.hunger    + (elapsed_minutes / 5.0).floor)
+    pet.tiredness = clamp(pet.tiredness - (elapsed_minutes / 5.0).floor)
+    pet.hygiene   = clamp(pet.hygiene   - (elapsed_minutes / 10.0).floor)
     pet.last_interaction = now
   end
 

@@ -174,26 +174,26 @@ RSpec.describe PetMechanics do
   end
 
   describe ".apply_time_decay" do
-    it "increases hunger based on elapsed hours" do
-      pet.update!(hunger: 10, last_interaction: 8.hours.ago)
+    it "increases hunger based on elapsed minutes" do
+      pet.update!(hunger: 10, last_interaction: 15.minutes.ago)
       PetMechanics.apply_time_decay(pet)
-      expect(pet.hunger).to eq(12) # 8h / 4 = 2 increase
+      expect(pet.hunger).to eq(13) # 15min / 5 = 3
     end
 
-    it "decreases hygiene based on elapsed hours" do
-      pet.update!(hygiene: 80, last_interaction: 12.hours.ago)
+    it "decreases hygiene based on elapsed minutes" do
+      pet.update!(hygiene: 80, last_interaction: 30.minutes.ago)
       PetMechanics.apply_time_decay(pet)
-      expect(pet.hygiene).to eq(78) # 12h / 6 = 2 decrease
+      expect(pet.hygiene).to eq(77) # 30min / 10 = 3
     end
 
-    it "decreases tiredness based on elapsed hours" do
-      pet.update!(tiredness: 40, last_interaction: 8.hours.ago)
+    it "decreases tiredness based on elapsed minutes" do
+      pet.update!(tiredness: 40, last_interaction: 10.minutes.ago)
       PetMechanics.apply_time_decay(pet)
-      expect(pet.tiredness).to eq(38) # 8h / 4 = 2 decrease
+      expect(pet.tiredness).to eq(38) # 10min / 5 = 2
     end
 
     it "clamps stats at boundaries" do
-      pet.update!(hunger: 99, hygiene: 1, last_interaction: 48.hours.ago)
+      pet.update!(hunger: 99, hygiene: 1, last_interaction: 120.minutes.ago)
       PetMechanics.apply_time_decay(pet)
       expect(pet.hunger).to eq(100)
       expect(pet.hygiene).to eq(0)
