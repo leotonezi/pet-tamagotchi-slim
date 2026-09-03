@@ -33,4 +33,6 @@ export const petsApi = {
   play: (id: number, hours: 1 | 2 | 4) =>
     client.post<Pet>(`/api/v1/pets/${id}/play`, { hours }),
   checkStatus: (id: number) => client.post<Pet>(`/api/v1/pets/${id}/check_status`),
+  breed: (parentAId: number, parentBId: number, name: string) =>
+    client.post<Pet>('/api/v1/breed', { parent_a_id: parentAId, parent_b_id: parentBId, name }),
 }

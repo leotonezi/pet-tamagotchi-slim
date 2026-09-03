@@ -15,6 +15,13 @@ export default function PetListPage() {
   const [species, setSpecies] = useState('')
   const [formError, setFormError] = useState('')
 
+  const [breedOpen, setBreedOpen] = useState(false)
+  const [breedParentA, setBreedParentA] = useState('')
+  const [breedParentB, setBreedParentB] = useState('')
+  const [breedName, setBreedName] = useState('')
+  const [breedError, setBreedError] = useState('')
+  const [breedSuccess, setBreedSuccess] = useState('')
+
   const createMutation = useMutation({
     mutationFn: () => petsApi.create(name, species),
     onSuccess: () => {
@@ -29,10 +36,30 @@ export default function PetListPage() {
     },
   })
 
+  const breedMutation = useMutation({
+    mutationFn: () =>
+      petsApi.breed(Number(breedParentA), Number(breedParentB), breedName),
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ['pets'] })
+      setBreedError('')
+      setBreedSuccess(`${res.data.name} (${res.data.species}) was born!`)
+      setBreedParentA('')
+      setBreedParentB('')
+      setBreedName('')
+    },
+    onError: (err: unknown) => {
+      const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error
+      setBreedError(msg ?? 'Breeding failed')
+      setBreedSuccess('')
+    },
+  })
+
   async function handleSignOut() {
     await signOut()
     navigate('/login')
   }
+
+  const alivePets = pets?.filter(p => p.is_alive) ?? []
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -78,6 +105,71 @@ export default function PetListPage() {
             </button>
           </div>
         </div>
+
+        {/* Breed section */}
+        {alivePets.length >= 2 && (
+          <div className="bg-white rounded-2xl shadow p-6 mb-6">
+            <button
+              onClick={() => { setBreedOpen(o => !o); setBreedError(''); setBreedSuccess('') }}
+              className="w-full flex items-center justify-between font-semibold"
+            >
+              <span>Breed Pets</span>
+              <span className="text-gray-400 text-sm">{breedOpen ? '▲' : '▼'}</span>
+            </button>
+
+            {breedOpen && (
+              <div className="mt-4 space-y-3">
+                {breedError && <p className="text-red-600 text-sm">{breedError}</p>}
+                {breedSuccess && <p className="text-green-600 text-sm">{breedSuccess}</p>}
+
+                <div className="flex gap-3">
+                  <select
+                    value={breedParentA}
+                    onChange={e => setBreedParentA(e.target.value)}
+                    className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400"
+                  >
+                    <option value="">Parent A</option>
+                    {alivePets.map(p => (
+                      <option key={p.id} value={p.id} disabled={String(p.id) === breedParentB}>
+                        {p.name} ({p.species})
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={breedParentB}
+                    onChange={e => setBreedParentB(e.target.value)}
+                    className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400"
+                  >
+                    <option value="">Parent B</option>
+                    {alivePets.map(p => (
+                      <option key={p.id} value={p.id} disabled={String(p.id) === breedParentA}>
+                        {p.name} ({p.species})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex gap-3">
+                  <input
+                    placeholder="Offspring name"
+                    value={breedName}
+                    onChange={e => setBreedName(e.target.value)}
+                    maxLength={32}
+                    className="flex-1 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-pink-400"
+                  />
+                  <button
+                    onClick={() => breedMutation.mutate()}
+                    disabled={!breedParentA || !breedParentB || !breedName || breedMutation.isPending}
+                    className="bg-pink-500 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-pink-600 disabled:opacity-50"
+                  >
+                    {breedMutation.isPending ? '…' : 'Breed'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Pet list */}
         {isLoading && <p className="text-gray-400 text-center">Loading…</p>}

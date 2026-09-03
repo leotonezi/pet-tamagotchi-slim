@@ -18,6 +18,8 @@ Rails.application.routes.draw do
       post "inventory/buy",  to: "inventory#buy"
       post "inventory/use",  to: "inventory#use"
 
+      post "breed", to: "breed#create"
+
       resources :pets, only: %i[index show create destroy] do
         member do
           post :feed
