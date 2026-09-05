@@ -71,6 +71,7 @@ export default function PetListPage() {
           </div>
           <div className="flex items-center gap-4">
             <Link to="/shop" className="text-sm text-blue-500 hover:underline">🛒 Shop</Link>
+            <Link to="/rewards" className="text-sm text-blue-500 hover:underline">🎁 Rewards</Link>
             <button onClick={handleSignOut} className="text-sm text-gray-500 hover:text-red-500">
               Sign out
             </button>

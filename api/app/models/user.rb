@@ -3,6 +3,7 @@ class User < ApplicationRecord
 
   has_many :pets, dependent: :destroy
   has_one  :inventory, dependent: :destroy
+  has_one  :claim_state, dependent: :destroy
 
   after_create :create_inventory
 

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_03_145213) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_05_205125) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -25,6 +25,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_03_145213) do
     t.index ["owner_id"], name: "index_breed_records_on_owner_id"
     t.index ["parent_a_id"], name: "index_breed_records_on_parent_a_id"
     t.index ["parent_b_id"], name: "index_breed_records_on_parent_b_id"
+  end
+
+  create_table "claim_states", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "last_claimed_at"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id"], name: "index_claim_states_on_user_id", unique: true
   end
 
   create_table "devise_api_tokens", force: :cascade do |t|
@@ -114,6 +122,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_03_145213) do
   add_foreign_key "breed_records", "pets", column: "parent_a_id"
   add_foreign_key "breed_records", "pets", column: "parent_b_id"
   add_foreign_key "breed_records", "users", column: "owner_id"
+  add_foreign_key "claim_states", "users"
   add_foreign_key "inventories", "users"
   add_foreign_key "inventory_slots", "inventories"
   add_foreign_key "inventory_slots", "items"

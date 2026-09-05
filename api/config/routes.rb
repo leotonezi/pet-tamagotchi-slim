@@ -20,6 +20,9 @@ Rails.application.routes.draw do
 
       post "breed", to: "breed#create"
 
+      get  "rewards",       to: "rewards#show"
+      post "rewards/claim", to: "rewards#claim"
+
       resources :pets, only: %i[index show create destroy] do
         member do
           post :feed
