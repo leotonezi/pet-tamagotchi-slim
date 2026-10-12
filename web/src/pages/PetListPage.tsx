@@ -4,6 +4,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { petsApi } from '../api/pets'
 import { useAuth } from '../contexts/AuthContext'
 import { usePets } from '../hooks/usePet'
+import { Gift, ShoppingCart } from 'lucide-react'
+import PetAvatar from '../components/pet/PetAvatar'
 
 export default function PetListPage() {
   const { user, signOut } = useAuth()
@@ -70,8 +72,8 @@ export default function PetListPage() {
             <p className="text-sm text-gray-500 mt-1">{user?.email} · {user?.coins ?? 0} coins</p>
           </div>
           <div className="flex items-center gap-4">
-            <Link to="/shop" className="text-sm text-blue-500 hover:underline">🛒 Shop</Link>
-            <Link to="/rewards" className="text-sm text-blue-500 hover:underline">🎁 Rewards</Link>
+            <Link to="/shop" className="inline-flex items-center gap-1 text-sm text-blue-500 hover:underline"><ShoppingCart className="w-4 h-4" /> Shop</Link>
+            <Link to="/rewards" className="inline-flex items-center gap-1 text-sm text-blue-500 hover:underline"><Gift className="w-4 h-4" /> Rewards</Link>
             <button onClick={handleSignOut} className="text-sm text-gray-500 hover:text-red-500">
               Sign out
             </button>
@@ -185,7 +187,8 @@ export default function PetListPage() {
               className="block bg-white rounded-2xl shadow p-5 hover:shadow-md transition-shadow"
             >
               <div className="flex items-center justify-between">
-                <div>
+                <div className="flex items-center">
+                  <PetAvatar species={pet.species} className={`w-5 h-5 mr-2 ${pet.is_alive ? 'text-gray-700' : 'text-gray-300'}`} />
                   <span className="font-semibold">{pet.name}</span>
                   <span className="ml-2 text-sm text-gray-400">{pet.species}</span>
                   {!pet.is_alive && (

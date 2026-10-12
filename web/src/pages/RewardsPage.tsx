@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { rewardsApi } from '../api/rewards'
 import { useAuth } from '../contexts/AuthContext'
+import { Gift } from 'lucide-react'
 
 export default function RewardsPage() {
   const { user } = useAuth()
@@ -62,7 +63,7 @@ export default function RewardsPage() {
         </div>
 
         <div className="bg-white rounded-2xl shadow p-8 text-center">
-          <p className="text-5xl mb-4">🎁</p>
+          <Gift className="w-14 h-14 mx-auto mb-4 text-pink-500" />
           <p className="text-sm text-gray-400 mb-6">
             {user?.coins ?? 0} coins in wallet
           </p>

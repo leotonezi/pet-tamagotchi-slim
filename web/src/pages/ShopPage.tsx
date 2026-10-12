@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { type Item, shopApi } from '../api/shop'
 import { useAuth } from '../contexts/AuthContext'
+import { ArrowLeft, Coins } from 'lucide-react'
 
 const DELTA_LABELS: Array<{ key: keyof Item; label: string; good: boolean }> = [
   { key: 'hunger_delta',    label: 'Hunger',    good: false },
@@ -41,9 +42,9 @@ export default function ShopPage() {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold">Shop</h1>
-            <p className="text-sm text-gray-500 mt-1">💰 {user?.coins ?? 0} coins</p>
+            <p className="inline-flex items-center gap-1 text-sm text-gray-500 mt-1"><Coins className="w-4 h-4 text-yellow-500" /> {user?.coins ?? 0} coins</p>
           </div>
-          <Link to="/pets" className="text-sm text-blue-500 hover:underline">← My Pets</Link>
+          <Link to="/pets" className="inline-flex items-center gap-1 text-sm text-blue-500 hover:underline"><ArrowLeft className="w-4 h-4" /> My Pets</Link>
         </div>
 
         {isLoading && <p className="text-gray-400 text-center">Loading…</p>}

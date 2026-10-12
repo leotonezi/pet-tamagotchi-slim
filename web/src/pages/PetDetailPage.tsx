@@ -4,14 +4,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { petsApi } from '../api/pets'
 import { shopApi } from '../api/shop'
 import { usePet } from '../hooks/usePet'
-
-const ACTION_LABELS: Record<string, string> = {
-  feeding:  '🍖 Feeding',
-  walking:  '🦮 Walking',
-  bathing:  '🛁 Bathing',
-  sleeping: '💤 Sleeping',
-  playing:  '🎮 Playing',
-}
+import { ArrowLeft, Bath, Drumstick, Footprints, Gamepad2, Moon, Skull } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import PetAvatar from '../components/pet/PetAvatar'
+import { ACTION_ICONS, ACTION_LABELS } from '../components/pet/actionIcons'
 
 function useCountdown(endsAt: string | null, onExpire?: () => void) {
   const [remaining, setRemaining] = useState('')
@@ -84,14 +80,19 @@ export default function PetDetailPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="max-w-lg mx-auto">
-        <Link to="/pets" className="text-sm text-blue-500 hover:underline mb-6 block">← All pets</Link>
+        <Link to="/pets" className="inline-flex items-center gap-1 text-sm text-blue-500 hover:underline mb-6">
+          <ArrowLeft className="w-4 h-4" /> All pets
+        </Link>
 
         <div className="bg-white rounded-2xl shadow p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-1">
-            <h1 className="text-2xl font-bold">{pet.name}</h1>
+            <div className="flex items-center gap-3">
+              <PetAvatar species={pet.species} className={`w-8 h-8 ${dead ? 'text-gray-300' : 'text-gray-700'}`} />
+              <h1 className="text-2xl font-bold">{pet.name}</h1>
+            </div>
             {dead
-              ? <span className="text-red-500 font-semibold text-sm">DEAD</span>
+              ? <span className="inline-flex items-center gap-1 text-red-500 font-semibold text-sm"><Skull className="w-4 h-4" /> DEAD</span>
               : <span className="text-green-500 font-semibold text-sm">Alive</span>}
           </div>
           <p className="text-gray-400 text-sm mb-4">{pet.species}</p>
@@ -99,7 +100,11 @@ export default function PetDetailPage() {
           {/* Active action banner */}
           {busy && (
             <div className="mb-5 flex items-center justify-between bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">
-              <span className="text-blue-700 font-medium text-sm">
+              <span className="inline-flex items-center gap-2 text-blue-700 font-medium text-sm">
+                {(() => {
+                  const Icon = ACTION_ICONS[pet.active_action!]
+                  return Icon ? <Icon className="w-4 h-4" /> : null
+                })()}
                 {ACTION_LABELS[pet.active_action!] ?? pet.active_action}…
               </span>
               {countdown && (
@@ -111,9 +116,9 @@ export default function PetDetailPage() {
           {/* Need badges */}
           {!busy && (
             <div className="flex gap-2 mb-5 flex-wrap">
-              {pet.needs_meal && <Badge color="orange">🍖 Hungry</Badge>}
-              {pet.needs_bath && <Badge color="yellow">🛁 Dirty</Badge>}
-              {pet.needs_walk && <Badge color="blue">🦮 Bored</Badge>}
+              {pet.needs_meal && <Badge color="orange" icon={Drumstick}>Hungry</Badge>}
+              {pet.needs_bath && <Badge color="yellow" icon={Bath}>Dirty</Badge>}
+              {pet.needs_walk && <Badge color="blue" icon={Footprints}>Bored</Badge>}
               {!pet.needs_meal && !pet.needs_bath && !pet.needs_walk && !dead && (
                 <span className="text-xs text-gray-400">All good!</span>
               )}
@@ -132,14 +137,15 @@ export default function PetDetailPage() {
           {/* Care buttons */}
           {!dead && (
             <div className="grid grid-cols-2 gap-3">
-              <ActionBtn label="🍖 Feed"  onClick={() => feedMut.mutate()}  disabled={busy || anyLoading} loading={feedMut.isPending} />
-              <ActionBtn label="🦮 Walk"  onClick={() => walkMut.mutate()}  disabled={busy || anyLoading} loading={walkMut.isPending} />
-              <ActionBtn label="🛁 Bathe" onClick={() => batheMut.mutate()} disabled={busy || anyLoading} loading={batheMut.isPending} />
+              <ActionBtn icon={Drumstick}  label="Feed"  onClick={() => feedMut.mutate()}  disabled={busy || anyLoading} loading={feedMut.isPending} />
+              <ActionBtn icon={Footprints} label="Walk"  onClick={() => walkMut.mutate()}  disabled={busy || anyLoading} loading={walkMut.isPending} />
+              <ActionBtn icon={Bath}       label="Bathe" onClick={() => batheMut.mutate()} disabled={busy || anyLoading} loading={batheMut.isPending} />
 
               {/* Sleep picker */}
               <div className="relative">
                 <ActionBtn
-                  label="💤 Sleep"
+                  icon={Moon}
+                  label="Sleep"
                   onClick={() => { setSleepPicker(v => !v); setPlayPicker(false) }}
                   disabled={busy || anyLoading}
                   loading={sleepMut.isPending}
@@ -165,7 +171,8 @@ export default function PetDetailPage() {
               {/* Play picker */}
               <div className="relative">
                 <ActionBtn
-                  label="🎮 Play"
+                  icon={Gamepad2}
+                  label="Play"
                   onClick={() => { setPlayPicker(v => !v); setSleepPicker(false) }}
                   disabled={busy || anyLoading}
                   loading={playMut.isPending}
@@ -247,25 +254,29 @@ function StatBar({ label, value, color, invert = false }: {
   )
 }
 
-function Badge({ children, color }: { children: React.ReactNode; color: string }) {
+function Badge({ children, color, icon: Icon }: { children: React.ReactNode; color: string; icon: LucideIcon }) {
   const map: Record<string, string> = {
     orange: 'bg-orange-100 text-orange-600',
     yellow: 'bg-yellow-100 text-yellow-600',
     blue:   'bg-blue-100 text-blue-600',
   }
-  return <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${map[color] ?? ''}`}>{children}</span>
+  return (
+    <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${map[color] ?? ''}`}>
+      <Icon className="w-3 h-3" />{children}
+    </span>
+  )
 }
 
-function ActionBtn({ label, onClick, disabled, loading }: {
-  label: string; onClick: () => void; disabled: boolean; loading: boolean
+function ActionBtn({ icon: Icon, label, onClick, disabled, loading }: {
+  icon: LucideIcon; label: string; onClick: () => void; disabled: boolean; loading: boolean
 }) {
   return (
     <button
       onClick={onClick}
       disabled={disabled || loading}
-      className="w-full py-2 rounded-xl border border-gray-200 text-sm font-medium hover:bg-gray-50 disabled:opacity-40 transition-colors"
+      className="w-full py-2 rounded-xl border border-gray-200 text-sm font-medium hover:bg-gray-50 disabled:opacity-40 transition-colors inline-flex items-center justify-center gap-2"
     >
-      {loading ? '…' : label}
+      {loading ? '…' : <><Icon className="w-4 h-4" />{label}</>}
     </button>
   )
 }
